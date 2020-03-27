@@ -4,7 +4,7 @@ block_cipher = None
 
 
 a = Analysis(['komikdl.py'],
-             pathex=['F:\\- PROJECTS -\\KomikDL'],
+             pathex=['KomikDL'],
              binaries=[],
              datas=[],
              hiddenimports=['pkg_resources.py2_warn', 'modules'],
