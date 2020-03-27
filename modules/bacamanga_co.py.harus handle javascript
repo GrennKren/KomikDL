@@ -1,0 +1,48 @@
+#yg wajib ada:
+#   - getJudul()
+#   - getChapter()
+#   - isWholeChapters()
+#   - parseContent(c, title='')
+
+from bs4 import BeautifulSoup
+import requests
+import re
+
+class helper():
+    def __init__(self):
+        self.__kontenHalaman = ''
+        self.__url = ''
+        
+    def getJudul(self):
+        judul = BeautifulSoup(self.__kontenHalaman['content'],features='html.parser').title.text.lower()
+        judul = judul.split('chapter')[0].title()
+        return judul
+
+    def getChapter(self):
+        chapter = BeautifulSoup(self.__kontenHalaman['content'],features='html.parser').title.text.lower()
+        chapter = re.sub('.+chapter ([\d\-\_\s\.]+).+','\g<1>',chapter)
+        chapter = re.sub('-','.',chapter)
+        if(chapter.find('.') < 0):
+            chapter = re.sub('\s+','.',chapter.strip())
+        else:
+            chapter = re.sub('\s','',chapter.strip())
+        return chapter
+    
+    def getCSSSelector(self,choice):
+        if(choice == 'all_chapters_url'):
+            return ".bixbox ul:not(#manga-history-ul) .lchx a"
+        elif(choice == 'all_images_url'):
+            return "#readerarea img"
+    
+    def parseContent(self,content='',url=''):
+        self.__kontenHalaman = content
+        self.__url = url
+        
+    def isWholeChapters(self):
+        sectionURL = list(filter(None,self.__url.split('/')))
+        
+        if(sectionURL[2] == 'manga'):
+            return True
+        else:
+            return False       
+        
