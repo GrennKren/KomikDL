@@ -1,4 +1,5 @@
 from .kiryuu_co import *
+from .komikav_com import *
 from .komikcast_com import *
 from .komikindo_web_id import *
 from .komiku_co_id import *
