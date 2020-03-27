@@ -34,6 +34,7 @@ Selain penggunaan di atas ada juga beberapa parameter yang disediakan.
   --pdf , Menyimpan hasil download ke dalam bentuk PDF
 ```
 
+Berikut contoh lengkap saat menggunakan parameter2 di atas.
 ### Contoh Penggunaan Lengkap
 ```
   komikdl --chapter 4 https://example.com/manga/judul-komik/                  | untuk mendownload chapter  4 nya saja
@@ -59,7 +60,20 @@ https://komi**id/manga/judul-komik/ --chapter 300-
 https://sekt**.com/judul-komik-chapter-01-bahasa-indonesia/ --pdf
 ```
 
-Sebagai tambahan, jelas saja banyak kesalahan dan kekurangan dari program ini dikarenakan masih kurang nya pengetahuan yang 
+Dan jelas merupakan salah satu yang penting untuk diketahui, yaitu lokasi simpan nya.
+### Lokasi Penyimpanan
+untuk hasil download secara *default* berada di folder user.
+Windows : 
+`C:\Users\UsernameMu\Komikdl\` atau `%USERPROFILE%\Komikdl\`
+ 
+ Linux : 
+ `/Home/Usernamemu/Komikdl/` atau `$HOME/Komikdl/`
+
+Adapula selain folder **KomikDL** di folder pengguna, ada file bernama **komikdl.conf** yang berisikan parameter pengaturan dasar seperti `nama_folder` untuk nama lokasi penyimpanan yang dimana default nya sudah ketebak yaitu "KomikDL". `default_path` untuk lokasi folder penyimpanan, jika kosong isinya berarti menggunakan lokasi penyimpanan di atas. `timeout` untuk mengatur batas waktu saat program berusaha terhubung dengan sebuah url. `lebar_pdf` untuk mengatur width/lebar gambar ketika disimpan ke PDF.
+
+
+Sebagai tambahan, 
+jelas saja banyak kesalahan dan kekurangan dari program ini dikarenakan masih kurang nya pengetahuan yang 
 saya miliki dalam membuatnya. Seperti kemungkinan menemukan pesan error dan program tidak berjalan sebagai mestinya.
 Tapi yang paling jelas, tidak semua situs komik support dalam program tool ini, dikarenakan belum saya tambahkan 
 ataupun memang saya mengalami kendala dalam menangangi situs web tersebut. 
