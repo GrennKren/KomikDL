@@ -12,6 +12,7 @@ from bs4 import BeautifulSoup
 
 from requests.exceptions import SSLError
 from requests.exceptions import MissingSchema
+from requests.exceptions import ConnectTimeout
 
 from .pdf import SimpanPDF 
 from . import konfigurasi as konfig
