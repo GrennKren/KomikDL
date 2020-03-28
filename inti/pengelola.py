@@ -22,7 +22,7 @@ LEBAR_PDF     = konfig.lebar_pdf
 TIMEOUT       = konfig.timeout
 DEFAULT_PATH  = konfig.default_path
 browser       = create_scraper()
-domainExtract = TLDExtract(cache_file=DEFAULT_PATH+"\\tldextract.txt")
+domainExtract = TLDExtract(cache_file=DEFAULT_PATH+"\\cache_domain_TLD.txt")
 
 class URL():
     
@@ -71,10 +71,10 @@ class URL():
         
     def get_all_images_url(self, c = ""):
         listImages = BeautifulSoup(c ,features='html.parser').select(self.modul.CSSSelector('all_images_url'))
-        
         listURL = []
         for i in listImages:
             url = BeautifulSoup(str(i),features='html.parser').find('img')['src']
+            url = sub('\\t|\\n','',url)
             if(urlparse(url).netloc):
                 listURL.append(url)
             
@@ -86,7 +86,7 @@ class URL():
         if(aksi_ambil_total_chapter):
             self.modul.url = url
             if(not self.modul.isWholeChapters):
-                tmp = self.requestGet(url)
+                #tmp = self.requestGet(url)
                 if(type(self.modul.CSSSelector('front_page')) == type({})):
                     url = self.modul.CSSSelector('front_page').get('url')
                 else:
@@ -97,15 +97,21 @@ class URL():
         listURL = []
         for index,i in enumerate(listHyperlink):
             if(filter):
+                
                 re_1 = '.*chapter ([\d\.]+\s*[\_\-\.]?\s*[\d\.]*).*'
                 re_2 = '.*?([\d\.]+)\s*\:.*'
+                re_3 = '.+?chapter-(\d+-?\d*).+'
+                
                 if(search(re_1,i.text.lower())):
-                    x = sub(re_1,'\g<1>',i.text.lower())
+                    x = sub(re_1, '\g<1>', i.text.lower())
                 elif(search(re_2,i.text.lower())):
                     x = sub(re_2, '\g<1>', i.text.lower())
+                elif(search(re_3, str(i))):
+                    x = sub(re_3, '\g<1>', str(i).lower())
                 else:
                     raise Exception('Tidak menemukan regex yang tepat untuk mencari nomor chapter')
                     return
+                
                 x = x.replace(' ','').replace('_','.').replace('-','.')
                 x = float(sub('\.+','.',x))
                 
@@ -118,9 +124,9 @@ class URL():
                             listURL.append(BeautifulSoup(str(i),features='html.parser').find('a')['href'])
             else:
                 listURL.append(BeautifulSoup(str(i),features='html.parser').find('a')['href'])
-                
+             
         listURL.reverse()
-        
+         
         return listURL
          
     def get_format_file(self, content_type):
@@ -206,6 +212,7 @@ class URL():
                     ######################################
                     
                     if(aksi_ambil_total_chapter):
+                        
                         daftar_chapter = self.get_all_chapters_url(aksi_ambil_total_chapter=True)
                         print("{} - {} | Total Chapter : {}".format(domain_website, judul, len(daftar_chapter)))
                         return
@@ -311,6 +318,7 @@ def tindakan(url, **parameter):
         get_total_chapter = parameter['get_total_chapter'] # True or False
         aksi_periksa = parameter['aksi_periksa'] # True or False
         simpan_pdf = parameter['simpan_pdf'] # True or False
+        
         if(d.modul.isWholeChapters):
             terbaru = parameter['terbaru']
             URLs = d.get_all_chapters_url(filter=daftar_index)   
