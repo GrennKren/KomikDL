@@ -86,8 +86,11 @@ class URL():
         if(aksi_ambil_total_chapter):
             self.modul.url = url
             if(not self.modul.isWholeChapters):
-                tmp = self.requestGet(self.url)
-                url = BeautifulSoup(c, features='html.parser').select(self.modul.CSSSelector('front_page'))[0]['href']
+                tmp = self.requestGet(url)
+                if(type(self.modul.CSSSelector('front_page')) == type({})):
+                    url = self.modul.CSSSelector('front_page').get('url')
+                else:
+                    url = BeautifulSoup(c, features='html.parser').select(self.modul.CSSSelector('front_page'))[0]['href']
                 c = self.requestGet(url).content
         
         listHyperlink = BeautifulSoup(c, features='html.parser').select(self.modul.CSSSelector('all_chapters_url'))
