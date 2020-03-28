@@ -20,7 +20,8 @@ class helper():
     @property
     def judul(self):
         title = self.title_halaman 
-        judul = title.split('chapter')[0].split("/")[0].title().strip()
+        judul = title.split('chapter')[0].split("/")[0].title()
+        judul = judul.split(" ", 1)[1].title().strip()
         return judul
     
     @property
@@ -42,7 +43,7 @@ class helper():
             return '#readerarea img'
         elif(choice == 'front_page'):
             return '.headpost a'
-        
+            
     def parseContent(self,content=''):
         self.__kontenHalaman = content
     

@@ -226,11 +226,15 @@ class URL():
                     
                     URLs = self.get_all_images_url(konten_halaman)
                     index = 0;
+                    
                     for i,v in enumerate(URLs): #URL GAMBARNYA
                         if(aksi_periksa):
                             cetak_detail_judul(end =' | Memeriksa...({}/{})'.format(i+1,len(URLs)))
                         try:
                             req = self.requestHead(v)
+                            if(not req.ok):
+                                raise Exception('Gambar tidak ditemukan dengan kode respon ' + req.status_code)
+                            
                             format_file = self.get_format_file(req.headers.get('content-type'))
                             if(format_file):
                                 index+=1
@@ -271,6 +275,8 @@ class URL():
                                 if(aksi_periksa): #Kupikir hanya karena format gambar nya ga sesuai bukan berarti rusak
                                     continue
                                 raise Exception('format gambar tidak sesuai')
+                        except ConnectTimeout:
+                            raise Exception('Dikarenakan request timeout')
                         except Exception as msg:
                             if(not aksi_periksa):
                                 print("{}) Skipped - alasan : {}".format(str(i+1),msg) )
@@ -292,7 +298,7 @@ class URL():
                     return          
         except Exception as msg:
             raise Exception("Tidak dapat terhubung dengan : " + self.website + "\n" + str(msg))
-
+            return False    
 
 def tindakan(url, **parameter):
     try:
