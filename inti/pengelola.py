@@ -191,7 +191,7 @@ class URL():
                     #####################################
                     modul = self.modul
                     modul.parseContent(konten_halaman)
-                    judul = modul.judul
+                    judul = modul.judul.strip()
                     chapter = modul.chapter
                     
                     domain_website = self.website.capitalize()
@@ -276,7 +276,7 @@ class URL():
                                     continue
                                 raise Exception('format gambar tidak sesuai')
                         except ConnectTimeout:
-                            raise Exception('Dikarenakan request timeout')
+                            raise Exception('    Request Timeout')
                         except Exception as msg:
                             if(not aksi_periksa):
                                 print("{}) Skipped - alasan : {}".format(str(i+1),msg) )
