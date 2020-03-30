@@ -73,6 +73,7 @@ def main():
     input.add_argument('--terbaru', dest='terbaru',action='store_true')
     input.add_argument('--reverse', dest='terbaru',action='store_true')
     input.add_argument('--periksa', dest='cek', action='store_true')
+    input.add_argument('--periksa-cepat', dest='cek_cepat', action='store_true')
     input.add_argument('--total-chapter', action='store_true')
     input.add_argument('--pdf', action='store_true')
     
@@ -109,11 +110,12 @@ def main():
                 
                 daftar_index = get_index("".join(_input.range) if _input.range else [])
                 terbaru = _input.terbaru
-                cek = _input.cek
+                cek_cepat = _input.cek_cepat
+                cek = True if cek_cepat else _input.cek 
                 get_total_chapter = _input.total_chapter
                 simpan_pdf = _input.pdf
                 
-                _aksi(url,daftar_index=daftar_index, aksi_periksa=cek, terbaru=terbaru, get_total_chapter = get_total_chapter, simpan_pdf=simpan_pdf)    
+                _aksi(url,daftar_index=daftar_index, aksi_periksa=cek, aksi_periksa_cepat=cek_cepat, terbaru=terbaru, get_total_chapter = get_total_chapter, simpan_pdf=simpan_pdf)    
     
     i = [" ".join(argv[1:])]
     tmp_path_file = []

@@ -186,7 +186,7 @@ class URL():
                 raise Exception("Tidak dapat terhubung dengan : " + website + "\n" + str(msg))
                 return
             
-    def start_proses(self,url="", aksi_periksa=False, daftar_index=[], aksi_ambil_total_chapter = False, simpan_pdf = False):
+    def start_proses(self,url="", aksi_periksa=False, aksi_periksa_cepat=False, daftar_index=[], aksi_ambil_total_chapter = False, simpan_pdf = False):
         
         if(len(url) < 1):
             url = self.url
@@ -286,6 +286,9 @@ class URL():
                                 if(aksi_periksa): #Kupikir hanya karena format gambar nya ga sesuai bukan berarti rusak
                                     continue
                                 raise Exception('format gambar tidak sesuai')
+                            
+                            if(aksi_periksa_cepat and index >= 2):
+                                break
                         except ConnectTimeout:
                             raise Exception('    Request Timeout')
                         except Exception as msg:
@@ -295,8 +298,12 @@ class URL():
                             else:
                                 cetak_detail_judul(end =' | [Rusak]',end_2='\n')
                                 return
-                                
-                    cetak_detail_judul(end =' | [Aman]',end_2='\n') if aksi_periksa else False
+                    
+                    if(aksi_periksa):
+                        if(aksi_periksa_cepat):
+                            cetak_detail_judul(end =' | [Mungkin_Aman]',end_2='\n')
+                        else:
+                            cetak_detail_judul(end =' | [Aman]',end_2='\n')
                     print("") if not aksi_periksa else False
                     if(simpan_pdf):
                         _judul = f"{domain_website} - {judul} Chapter {chapter}"
@@ -317,7 +324,9 @@ def tindakan(url, **parameter):
         daftar_index = parameter['daftar_index'] # Dalam bentuk list
         get_total_chapter = parameter['get_total_chapter'] # True or False
         aksi_periksa = parameter['aksi_periksa'] # True or False
+        aksi_periksa_cepat=parameter['aksi_periksa_cepat']
         simpan_pdf = parameter['simpan_pdf'] # True or False
+        
         
         if(d.modul.isWholeChapters):
             terbaru = parameter['terbaru']
@@ -328,7 +337,7 @@ def tindakan(url, **parameter):
             for i in URLs:
                 i = d.normalisasi_url(i)
                 d.modul.url = i
-                d.start_proses(d.modul.url, aksi_periksa=aksi_periksa, aksi_ambil_total_chapter = get_total_chapter, simpan_pdf=simpan_pdf)
+                d.start_proses(d.modul.url, aksi_periksa=aksi_periksa, aksi_periksa_cepat=aksi_periksa_cepat, aksi_ambil_total_chapter = get_total_chapter, simpan_pdf=simpan_pdf)
                 if(get_total_chapter):
                     return
         else:   
