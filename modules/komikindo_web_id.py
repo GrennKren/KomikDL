@@ -20,21 +20,21 @@ class helper():
     @property
     def judul(self):
         title = self.title_halaman 
-        judul = title.split('chapter')[0].split("/")[0].lower()
+        judul = re.sub('(.+?)\s[chapter]{6,7}.+','\g<1>', title).split("/")[0].lower()
         judul = re.sub('(baca manga|baca komik)', '', judul).title().strip()
         return judul
     
     @property
     def chapter(self):
         title = self.title_halaman 
-        chapter = re.sub('.+chapter ([\d\-\_\s\.]+).+','\g<1>',title)
+        chapter = re.sub('.+?\s[chapter]{6,7} ([\d\-\_\s\.]+).+','\g<1>',title)
         chapter = re.sub('-','.',chapter)
         
         if(chapter.find('.') < 0):
-            chapter = re.sub('\s+','-',chapter.strip())
+            chapter = re.sub('\s+','.',chapter.strip())
         else:
             chapter = re.sub('\s','',chapter.strip())
-        return chapter
+        return chapter.strip('.')
     
     def CSSSelector(self,choice):
         if(choice == 'all_chapters_url'):

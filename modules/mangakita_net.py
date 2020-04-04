@@ -17,19 +17,19 @@ class helper():
     @property
     def judul(self):
         judul = BeautifulSoup(self.__kontenHalaman,features='html.parser').title.text.lower()
-        judul = judul.split('chapter')[0].split("/")[0].title().strip()
+        judul = re.sub('(.+?)\s[chapter]{6,7}.+','\g<1>', judul).split("/")[0].title().strip()
         return judul
     
     @property
     def chapter(self):
         chapter = BeautifulSoup(self.__kontenHalaman,features='html.parser').title.text.lower()
-        chapter = re.sub('.+chapter ([\d\-\_\s\.]+).+','\g<1>',chapter)
+        chapter = re.sub('.+?\s[chapter]{6,7} ([\d\-\_\s\.]+).+','\g<1>',chapter)
         chapter = re.sub('-','.',chapter)
         if(chapter.find('.') < 0):
             chapter = re.sub('\s+','.',chapter.strip())
         else:
             chapter = re.sub('\s','',chapter.strip())
-        return chapter
+        return chapter.strip('.')
     
     def CSSSelector(self,choice):
         if(choice == 'all_chapters_url'):
