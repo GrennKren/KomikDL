@@ -8,8 +8,8 @@ from re import sub
 from re import match
 
 _metode = Image.LANCZOS # ada PIL.Image.LANCZOS, PIL.Image.BILINEAR, PIL.Image.NEAREST, dan PIL.Image.BICUBIC. klo argumen 'resample' nya ga disertakan ya gpp. Ntar yg dipilih bilinear (Keknya)
-def SimpanPDF(path="",target_lebar=980, judul=''):
-    if(not path or not judul):
+def SimpanPDF(path="",target_lebar=980, nama_pdf=''):
+    if(not path or not nama_pdf):
         return False
     _listFile = [x for x in listdir(path) if isfile(f"{path}\\{x}")]
     try:
@@ -18,20 +18,20 @@ def SimpanPDF(path="",target_lebar=980, judul=''):
     except:
         print('Terjadi kesalahan saat sorting gambar')
         return False
-    _nama_file = path + "\\" + judul + ".pdf"
-    remove(_nama_file) if exists(_nama_file) else False
+    _output_pdf = path + "\\" + nama_pdf + ".pdf"
+    remove(_output_pdf) if exists(_output_pdf) else False
     for _ in _listFile:
-        if(_ == _nama_file):
+        if(_ == _output_pdf):
             continue
         try:
             with Image.open(f"{path}\\{_}") as f:
                 f_lebar = f.size[0]
                 f_tinggi = f.size[1]
                 rasio = target_lebar / f_lebar
-                if(not exists(_nama_file)):
-                    f.convert('RGB').resize((int(f_lebar * rasio), int(f_tinggi * rasio)),resample=_metode).save(_nama_file)
+                if(not exists(_output_pdf)):
+                    f.convert('RGB').resize((int(f_lebar * rasio), int(f_tinggi * rasio)),resample=_metode).save(_output_pdf)
                 else:
-                    f.convert('RGB').resize((int(f_lebar * rasio), int(f_tinggi * rasio)),resample=_metode).save(_nama_file ,append=True)
+                    f.convert('RGB').resize((int(f_lebar * rasio), int(f_tinggi * rasio)),resample=_metode).save(_output_pdf ,append=True)
         except PermissionError:
             print('Tidak bisa menyimpan ke PDF dikarenakan PDF yang dimaksud sudah terbuka di awal, mohon tutup terlebih dahulu')
             return False

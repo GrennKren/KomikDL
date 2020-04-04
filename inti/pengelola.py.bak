@@ -12,6 +12,7 @@ from bs4 import BeautifulSoup
 
 from requests.exceptions import SSLError
 from requests.exceptions import MissingSchema
+from requests.exceptions import ConnectTimeout
 
 from .pdf import SimpanPDF 
 from . import konfigurasi as konfig
@@ -21,7 +22,7 @@ LEBAR_PDF     = konfig.lebar_pdf
 TIMEOUT       = konfig.timeout
 DEFAULT_PATH  = konfig.default_path
 browser       = create_scraper()
-domainExtract = TLDExtract(cache_file=DEFAULT_PATH+"\\tldextract.txt")
+domainExtract = TLDExtract(cache_file=DEFAULT_PATH+"\\cache_domain_TLD.txt")
 
 class URL():
     
@@ -70,10 +71,10 @@ class URL():
         
     def get_all_images_url(self, c = ""):
         listImages = BeautifulSoup(c ,features='html.parser').select(self.modul.CSSSelector('all_images_url'))
-        
         listURL = []
         for i in listImages:
             url = BeautifulSoup(str(i),features='html.parser').find('img')['src']
+            url = sub('\\t|\\n','',url)
             if(urlparse(url).netloc):
                 listURL.append(url)
             
@@ -85,23 +86,32 @@ class URL():
         if(aksi_ambil_total_chapter):
             self.modul.url = url
             if(not self.modul.isWholeChapters):
-                tmp = self.requestGet(self.url)
-                url = BeautifulSoup(c, features='html.parser').select(self.modul.CSSSelector('front_page'))[0]['href']
+                #tmp = self.requestGet(url)
+                if(type(self.modul.CSSSelector('front_page')) == type({})):
+                    url = self.modul.CSSSelector('front_page').get('url')
+                else:
+                    url = BeautifulSoup(c, features='html.parser').select(self.modul.CSSSelector('front_page'))[0]['href']
                 c = self.requestGet(url).content
         
         listHyperlink = BeautifulSoup(c, features='html.parser').select(self.modul.CSSSelector('all_chapters_url'))
         listURL = []
         for index,i in enumerate(listHyperlink):
             if(filter):
+                
                 re_1 = '.*chapter ([\d\.]+\s*[\_\-\.]?\s*[\d\.]*).*'
                 re_2 = '.*?([\d\.]+)\s*\:.*'
+                re_3 = '.+?chapter-(\d+-?\d*).+'
+                
                 if(search(re_1,i.text.lower())):
-                    x = sub(re_1,'\g<1>',i.text.lower())
+                    x = sub(re_1, '\g<1>', i.text.lower())
                 elif(search(re_2,i.text.lower())):
                     x = sub(re_2, '\g<1>', i.text.lower())
+                elif(search(re_3, str(i))):
+                    x = sub(re_3, '\g<1>', str(i).lower())
                 else:
                     raise Exception('Tidak menemukan regex yang tepat untuk mencari nomor chapter')
                     return
+                
                 x = x.replace(' ','').replace('_','.').replace('-','.')
                 x = float(sub('\.+','.',x))
                 
@@ -114,9 +124,9 @@ class URL():
                             listURL.append(BeautifulSoup(str(i),features='html.parser').find('a')['href'])
             else:
                 listURL.append(BeautifulSoup(str(i),features='html.parser').find('a')['href'])
-                
+             
         listURL.reverse()
-        
+         
         return listURL
          
     def get_format_file(self, content_type):
@@ -176,7 +186,7 @@ class URL():
                 raise Exception("Tidak dapat terhubung dengan : " + website + "\n" + str(msg))
                 return
             
-    def start_proses(self,url="", aksi_periksa=False, daftar_index=[], aksi_ambil_total_chapter = False, simpan_pdf = False):
+    def start_proses(self,url="", aksi_periksa=False, aksi_periksa_cepat=False, daftar_index=[], aksi_ambil_total_chapter = False, simpan_pdf = False):
         
         if(len(url) < 1):
             url = self.url
@@ -191,7 +201,7 @@ class URL():
                     #####################################
                     modul = self.modul
                     modul.parseContent(konten_halaman)
-                    judul = modul.judul
+                    judul = modul.judul.strip()
                     chapter = modul.chapter
                     
                     domain_website = self.website.capitalize()
@@ -202,6 +212,7 @@ class URL():
                     ######################################
                     
                     if(aksi_ambil_total_chapter):
+                        
                         daftar_chapter = self.get_all_chapters_url(aksi_ambil_total_chapter=True)
                         print("{} - {} | Total Chapter : {}".format(domain_website, judul, len(daftar_chapter)))
                         return
@@ -226,11 +237,15 @@ class URL():
                     
                     URLs = self.get_all_images_url(konten_halaman)
                     index = 0;
+                    
                     for i,v in enumerate(URLs): #URL GAMBARNYA
                         if(aksi_periksa):
                             cetak_detail_judul(end =' | Memeriksa...({}/{})'.format(i+1,len(URLs)))
                         try:
                             req = self.requestHead(v)
+                            if(not req.ok):
+                                raise Exception('Gambar tidak ditemukan dengan kode respon ' + req.status_code)
+                            
                             format_file = self.get_format_file(req.headers.get('content-type'))
                             if(format_file):
                                 index+=1
@@ -271,6 +286,11 @@ class URL():
                                 if(aksi_periksa): #Kupikir hanya karena format gambar nya ga sesuai bukan berarti rusak
                                     continue
                                 raise Exception('format gambar tidak sesuai')
+                            
+                            if(aksi_periksa_cepat and index >= 2):
+                                break
+                        except ConnectTimeout:
+                            raise Exception('    Request Timeout')
                         except Exception as msg:
                             if(not aksi_periksa):
                                 print("{}) Skipped - alasan : {}".format(str(i+1),msg) )
@@ -278,8 +298,12 @@ class URL():
                             else:
                                 cetak_detail_judul(end =' | [Rusak]',end_2='\n')
                                 return
-                                
-                    cetak_detail_judul(end =' | [Aman]',end_2='\n') if aksi_periksa else False
+                    
+                    if(aksi_periksa):
+                        if(aksi_periksa_cepat):
+                            cetak_detail_judul(end =' | [Mungkin_Aman]',end_2='\n')
+                        else:
+                            cetak_detail_judul(end =' | [Aman]',end_2='\n')
                     print("") if not aksi_periksa else False
                     if(simpan_pdf):
                         _judul = f"{domain_website} - {judul} Chapter {chapter}"
@@ -292,7 +316,7 @@ class URL():
                     return          
         except Exception as msg:
             raise Exception("Tidak dapat terhubung dengan : " + self.website + "\n" + str(msg))
-
+            return False    
 
 def tindakan(url, **parameter):
     try:
@@ -300,7 +324,10 @@ def tindakan(url, **parameter):
         daftar_index = parameter['daftar_index'] # Dalam bentuk list
         get_total_chapter = parameter['get_total_chapter'] # True or False
         aksi_periksa = parameter['aksi_periksa'] # True or False
+        aksi_periksa_cepat=parameter['aksi_periksa_cepat']
         simpan_pdf = parameter['simpan_pdf'] # True or False
+        
+        
         if(d.modul.isWholeChapters):
             terbaru = parameter['terbaru']
             URLs = d.get_all_chapters_url(filter=daftar_index)   
@@ -310,7 +337,7 @@ def tindakan(url, **parameter):
             for i in URLs:
                 i = d.normalisasi_url(i)
                 d.modul.url = i
-                d.start_proses(d.modul.url, aksi_periksa=aksi_periksa, aksi_ambil_total_chapter = get_total_chapter, simpan_pdf=simpan_pdf)
+                d.start_proses(d.modul.url, aksi_periksa=aksi_periksa, aksi_periksa_cepat=aksi_periksa_cepat, aksi_ambil_total_chapter = get_total_chapter, simpan_pdf=simpan_pdf)
                 if(get_total_chapter):
                     return
         else:   

@@ -3,7 +3,7 @@ from os.path import exists
 from argparse import ArgumentParser
 
 import inti.konfigurasi as konfig
-from inti import tindakan
+from inti.pengelola import tindakan
 from re import sub
 from re import search
 from sys import argv
@@ -53,17 +53,6 @@ def get_lines(_input_file=''):
         return list(filter(None,i))    
     except FileNotFoundError:
         return False
-#================================================================
-# Urutan prioritas argumen (ga perlu disesuaikan urutan argumen pas eksekusi programnya)
-# 1) url (harus ada)
-# 2) --input-file LOKASI_FILE (Jika ini disertakan, parameter 3,4,dan 5 di hiraukan. Tapi parameter2 tersebut bisa diletakan disamping tiap baris dari url di file) 
-# 3) -get-total-chapter
-# 3) --periksa / --check (Tidak mendownload gambar, hanya memeriksa jika salah satu gambar ada yang rusak di chapter)
-# 4) --chapter -4,5,6,7-9,10- (Menentukan no chapter atau gambar yang mau di download atau di cek. x-x untuk dari nomor sekian ke sekian, "-x" untuk dari awal sampai nomor x, "x-" untuk dari nomor x ke akhir
-# 5) --terbaru (Mendownload ataupun hanya sekedar memeriksa (parameter --periksa) dari chapter terbaru)
-#
-#
-#
 
 def main():
     input = ArgumentParser()
@@ -82,7 +71,7 @@ def main():
         for i,v in enumerate(a):
             if a[i-1] == '--chapter':
                 a.__setitem__(i,v.split())
-        return a #sengaja menghandle sendiri parsing argument, agar tanda koma (,) ama dash (-) bisa digunakan secara leluasa di parameter --range
+        return a #sengaja menghandle sendiri parsing argument, agar tanda koma (,) ama dash (-) bisa digunakan secara leluasa di parameter --chapter
                 
     def handle_argument(i):
         
